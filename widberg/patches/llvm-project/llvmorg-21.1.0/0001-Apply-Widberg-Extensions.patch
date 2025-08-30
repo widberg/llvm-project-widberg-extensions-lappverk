@@ -1,11 +1,11 @@
-From 4d80d74f45ff0531f1e19fdb30fce14e8ac0209b Mon Sep 17 00:00:00 2001
+From 41ad1777c5b83b7ff253e94b3aa1c1676b3fe88b Mon Sep 17 00:00:00 2001
 From: widberg <widberg@widberg.me>
 Date: Wed, 27 Aug 2025 17:45:27 -0400
 Subject: Apply Widberg Extensions
 
 ---
- .github/workflows/widberg-build.yml           |  23 ++
- .github/workflows/widberg-release.yml         |  46 +++
+ .github/workflows/widberg-build.yml           |  24 ++
+ .github/workflows/widberg-release.yml         |  47 +++
  README.md                                     | 143 ++++++++
  clang/include/clang-c/Index.h                 |   7 +-
  clang/include/clang/AST/ASTContext.h          |   4 +
@@ -141,7 +141,7 @@ Subject: Apply Widberg Extensions
  llvm/utils/llvm.grm                           |   2 +
  .../clang/include/clang/Config/config.h       |   2 +-
  .../llvm/include/llvm/Config/config.h         |   4 +-
- 137 files changed, 2533 insertions(+), 166 deletions(-)
+ 137 files changed, 2535 insertions(+), 166 deletions(-)
  create mode 100644 .github/workflows/widberg-build.yml
  create mode 100644 .github/workflows/widberg-release.yml
  create mode 100644 clang/include/clang/AST/DeclWidberg.h
@@ -160,10 +160,10 @@ Subject: Apply Widberg Extensions
 
 diff --git a/.github/workflows/widberg-build.yml b/.github/workflows/widberg-build.yml
 new file mode 100644
-index 000000000000..7630e1ea0723
+index 000000000000..3e5d68531d75
 --- /dev/null
 +++ b/.github/workflows/widberg-build.yml
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,24 @@
 +name: Widberg Build
 +
 +on: [push, pull_request]
@@ -180,19 +180,20 @@ index 000000000000..7630e1ea0723
 +    - name: Build
 +      run: |
 +           cmake -S llvm -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_TARGETS_TO_BUILD="X86"
++           cmake --build build --config RelWithDebInfo --target vt_gen
 +           cmake --build build --config RelWithDebInfo --target clang
 +
 +    - name: Archive Artifacts
-+      uses: actions/upload-artifact@v3
++      uses: actions/upload-artifact@v4
 +      with:
 +        name: widberg-windows-x86_64-${{ github.sha }}
 +        path: ./build/bin/clang-cl.exe
 diff --git a/.github/workflows/widberg-release.yml b/.github/workflows/widberg-release.yml
 new file mode 100644
-index 000000000000..413e40b67ccb
+index 000000000000..60b9363ddf3d
 --- /dev/null
 +++ b/.github/workflows/widberg-release.yml
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,47 @@
 +name: Widberg Release
 +
 +on:
@@ -212,6 +213,7 @@ index 000000000000..413e40b67ccb
 +    - name: Build
 +      run: |
 +           cmake -S llvm -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_TARGETS_TO_BUILD="X86"
++           cmake --build build --config RelWithDebInfo --target vt_gen
 +           cmake --build build --config RelWithDebInfo --target clang
 +
 +    - name: Package
